@@ -22,28 +22,7 @@ Ironic Neutron integration testing
    mv ironic-neutron/devstack/examples/ironic-neutron-vm-local.conf devstack/local.conf
    ```
 
-4. Set password for stack user. It is needed in order to connect to localhost via SSH by ML2 driver.
-   In future ssh-key support will be added
-
-   ```
-   sudo su -c "echo 'stack:r00tme' | chpasswd"
-   ```
-
-5. Add ML2 generic_switch config. Update username/password accordinly
-
-   ```
-   sudo mkdir -p /etc/neutron/plugins/ml2/
-   sudo chown -R stack:stack /etc/neutron/
-   cat >/etc/neutron/plugins/ml2/ml2_conf_genericswitch.ini <<END
-   [genericswitch:brbm]
-   device_type=ovs_linux
-   ip=localhost
-   username=stack
-   password=r00tme
-   END
-   ```
-
-6. Apply patches that allow to test ironic neutron integration
+4. Apply patches that allow to test ironic neutron integration
 
    ```
    cd devstack/
@@ -51,31 +30,31 @@ Ironic Neutron integration testing
    ./stack.sh
    ```
 
-7. Create SSH key
+5. Create SSH key
 
    ```
    nova keypair-add ironic_key > ironic_key.pem
    ```
 
-8. Get user image_id
+6. Get user image_id
 
    ```
    image=$(nova image-list | egrep "cirros-0.3.4-x86_64-disk"'[^-]' | awk '{ print $2 }')
    ```
 
-9. Get private network id
+7. Get private network id
 
    ```
    net_id=$(neutron net-list | egrep "private"'[^-]' | awk '{ print $2 }')
    ```
 
-10. Boot the instance
+8. Boot the instance
 
    ```
    nova boot --flavor baremetal --image $image --key-name ironic_key --nic net-id=$net_id vm_name
    ```
 
-11. Check that during provision ironic node is in provision network.
+9. Check that during provision ironic node is in provision network.
    Node will recieve different IP during provision and in ACTIVE state.
    Find provision provider:segmentation_id field.
 
@@ -83,7 +62,7 @@ Ironic Neutron integration testing
    neutron net-show ironic-provision
    ```
 
-12. vm port should be dynamicly plugged to segmentation_id vlan. Example:
+10. vm port should be dynamicly plugged to segmentation_id vlan. Example:
 
    ```
    sudo ovs-vsctl show
@@ -95,7 +74,7 @@ Ironic Neutron integration testing
    ...
    ```
 
-13. when node is in active state check that tag has been changed to private network. Example:
+11. when node is in active state check that tag has been changed to private network. Example:
 
    ```
    sudo ovs-vsctl show
